@@ -1,7 +1,7 @@
 # streamfiler - TCP/IP stream fogadó és lemezre író alkalmazás
 A streamfiler egy porton figyelő alkalmazás, ami a csatlakozott connection tartalmát lemezre írja. A kiírt fájl neve megegyezik az érkezési időponttal (milisecundum pontossággal). Egyszerre több connection-t tud fogadni paraméterezéstől függően.
 ## Fordítási és futtatási környezet
-A program használatához **64 bites** Linux operációs rendszer, fordításához a GCC/**g++** fordító **C++11**-et támogató verziója (4.8.1-től felfelé) szükséges.
+A program használatához **64 bites Linux** operációs rendszer, fordításához a GCC/**g++** fordító **C++11**-et támogató verziója (4.8.1-től felfelé) szükséges.
 ## Fordítás menete
 Fordítása a program főkönyvtárából a mellékelt `Makefile` segítségével a `make` parancs kiadásával történhet:
 > make
