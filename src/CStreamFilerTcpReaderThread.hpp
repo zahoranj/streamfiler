@@ -5,13 +5,13 @@
  *  \brief   streamfiler tcp connection-kezelő szál osztály fejállománya
  *
  *  \author  Zahorán József
- * 
- *  \version 20210523 ZJ első változat
  *  
  *****************************************************************************/
 
 #ifndef CSTREAMFILERTCPREADERTHREAD_HPP
 #define CSTREAMFILERTCPREADERTHREAD_HPP
+
+#include "CStreamFilerHistogramMaker.hpp"
 
 #include <string>
 #include <vector>
@@ -25,10 +25,10 @@ public:
     CStreamFilerTcpReaderThread(const CStreamFilerTcpReaderThread& orig);
     virtual ~CStreamFilerTcpReaderThread();
     void operator()(int iConnectionDesc, long int lDataLimitByte, int iIdleTimeoutSec);
-    bool writeToFileFromBuffer(std::vector<char>& vBuffer, std::string& strFileName);
+    bool writeToFileFromBuffer(std::vector<uint8_t>& vBuffer, std::string& strFileName);
 
 private:
-
+    CStreamFilerHistogramMaker *m_streamFilerHistogramMaker;
 };
 
 #endif // CSTREAMFILERTCPREADERTHREAD_HPP 

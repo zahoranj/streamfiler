@@ -5,8 +5,6 @@
  *  \brief   streamfiler fájlkezelő osztálya
  *
  *  \author  Zahorán József
- * 
- *  \version 20210523 ZJ első változat
  *  
  *****************************************************************************/
 
@@ -104,7 +102,7 @@ bool CStreamFilerFileHandler::isFileWriterReady() const {
 /*! ***************************************************************************
  *  \brief  Buffer tartalmának írása fájlba
  * 
- *  \param  vWriteBuffer  IN  Buffer - char-vektor bináris adatokkal 
+ *  \param  vWriteBuffer  IN  Buffer - uint8_t-vektor bináris adatokkal 
  *  \param  strFileName   IN  Az írandó fájl neve (a célkönyvtár nélkül)
  *
  *  \return true, ha az írás sikeres, egyébként false
@@ -112,7 +110,7 @@ bool CStreamFilerFileHandler::isFileWriterReady() const {
  *  Kiírja a vWriteBuffer tartalmát a célkönyvtárban lévő 
  *  strFileName-ben megadott nevű fájlba
  *****************************************************************************/
-bool CStreamFilerFileHandler::writeToFile(std::vector<char> &vWriteBuffer, std::string &strFileName) {
+bool CStreamFilerFileHandler::writeToFile(std::vector<uint8_t> &vWriteBuffer, std::string &strFileName) {
     std::ofstream oFileStream;
     std::string strFullFileName;
     strFullFileName.assign(m_strDestFolder);
@@ -125,7 +123,7 @@ bool CStreamFilerFileHandler::writeToFile(std::vector<char> &vWriteBuffer, std::
     }
 
     vWriteBuffer.shrink_to_fit();
-    oFileStream.write(vWriteBuffer.data(), vWriteBuffer.size());
+    oFileStream.write(reinterpret_cast<char *>(vWriteBuffer.data()), vWriteBuffer.size());
     oFileStream.flush();
 
     oFileStream.close();

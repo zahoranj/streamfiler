@@ -5,8 +5,6 @@
  *  \brief   streamfiler központi osztály fejállománya
  *
  *  \author  Zahorán József
- * 
- *  \version 20210523 ZJ első változat
  *  
  *****************************************************************************/
 

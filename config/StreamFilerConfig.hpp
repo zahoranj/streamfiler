@@ -5,9 +5,7 @@
  *  \brief   streamfiler konfigurációs állománya
  *
  *  \author  Zahorán József
- * 
- *  \version 20210523 ZJ első változat
- *  
+ *   
  *****************************************************************************/
 
 #ifndef STREAMFILERCONFIG_HPP

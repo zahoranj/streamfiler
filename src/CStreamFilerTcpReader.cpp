@@ -5,8 +5,6 @@
  *  \brief   streamfiler tcp socket-kezelő osztálya
  *
  *  \author  Zahorán József
- * 
- *  \version 20210523 ZJ első változat
  *  
  *****************************************************************************/
 
@@ -134,7 +132,7 @@ void CStreamFilerTcpReader::startSocketListener() {
         //ha egy descriptort újra megkapok, akkor az előző használója már becsukta 
         //a "kapcsolatkezelő várakozási sor" a kapcsolatok nyilvántartását elvégzi helyettem
         //csak megkeresem és joinolom az előzőleg azt használó thread-et, ha befejezte, törlöm a map-ből
-        //!\TODO ha nem bízunk meg a kapcsolatkezelőben, ebből az objektumból kell singletont csinálni
+        //\TODO ha nem bízunk meg a kapcsolatkezelőben, ebből az objektumból kell singletont csinálni
         std::map<int, std::thread>::iterator iterMap = mapConnections.find(iConnectionDesc);
         if (iterMap != mapConnections.end()) {
             mapConnections.at(iConnectionDesc).join();

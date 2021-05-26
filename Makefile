@@ -19,6 +19,7 @@ all: $(TARGETDIR_streamfiler)/streamfiler
 OBJS_streamfiler =  \
 	$(TARGETDIR_streamfiler)/CStreamFilerCentral.o \
 	$(TARGETDIR_streamfiler)/CStreamFilerFileHandler.o \
+	$(TARGETDIR_streamfiler)/CStreamFilerHistogramMaker.o \
 	$(TARGETDIR_streamfiler)/CStreamFilerTcpReaderThread.o \
 	$(TARGETDIR_streamfiler)/CStreamFilerTcpReader.o \
 	$(TARGETDIR_streamfiler)/CStreamFilerTimeData.o \
@@ -41,6 +42,9 @@ $(TARGETDIR_streamfiler)/CStreamFilerCentral.o: $(TARGETDIR_streamfiler) src/CSt
 $(TARGETDIR_streamfiler)/CStreamFilerFileHandler.o: $(TARGETDIR_streamfiler) src/CStreamFilerFileHandler.cpp
 	$(COMPILE.cc) $(CCFLAGS_streamfiler) $(CPPFLAGS_streamfiler) -o $@ src/CStreamFilerFileHandler.cpp
 
+$(TARGETDIR_streamfiler)/CStreamFilerHistogramMaker.o: $(TARGETDIR_streamfiler) src/CStreamFilerHistogramMaker.cpp
+	$(COMPILE.cc) $(CCFLAGS_streamfiler) $(CPPFLAGS_streamfiler) -o $@ src/CStreamFilerHistogramMaker.cpp
+
 $(TARGETDIR_streamfiler)/CStreamFilerTcpReaderThread.o: $(TARGETDIR_streamfiler) src/CStreamFilerTcpReaderThread.cpp
 	$(COMPILE.cc) $(CCFLAGS_streamfiler) $(CPPFLAGS_streamfiler) -o $@ src/CStreamFilerTcpReaderThread.cpp
 
@@ -61,6 +65,7 @@ clean:
 		$(TARGETDIR_streamfiler)/streamfiler \
 		$(TARGETDIR_streamfiler)/CStreamFilerCentral.o \
 		$(TARGETDIR_streamfiler)/CStreamFilerFileHandler.o \
+		$(TARGETDIR_streamfiler)/CStreamFilerHistogramMaker.o \
 		$(TARGETDIR_streamfiler)/CStreamFilerTcpReaderThread.o \
 		$(TARGETDIR_streamfiler)/CStreamFilerTcpReader.o \
 		$(TARGETDIR_streamfiler)/CStreamFilerTimeData.o \

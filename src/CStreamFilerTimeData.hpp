@@ -6,8 +6,6 @@
  *
  *  \author  Zahorán József
  * 
- *  \version 20210523 ZJ első változat
- *  
  *****************************************************************************/
 
 #ifndef CSTREAMFILERTIMEDATA_HPP

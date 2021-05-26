@@ -5,9 +5,7 @@
  *  \brief   streamfiler fájlkezelő osztály fejállománya
  *
  *  \author  Zahorán József
- * 
- *  \version 20210523 ZJ első változat
- *  
+ *   
  *****************************************************************************/
 
 #ifndef CSTREAMFILERFILEHANDLER_HPP
@@ -26,7 +24,7 @@ public:
 
     bool initialize(const std::string &strFolder);
     bool isFileWriterReady() const;
-    bool writeToFile(std::vector<char> &vWriteBuffer, std::string &strFileName);
+    bool writeToFile(std::vector<uint8_t> &vWriteBuffer, std::string &strFileName);
 private:
    /*!*************************************************************************
     *  \brief   Az osztály egyetlen létező statikus példánya
@@ -55,12 +53,18 @@ private:
    /*!*************************************************************************
     *  \brief  Fájlkezelő singleton objektum copy konstruktora
     * 
+    *  \param  &orig IN A másolandó példány
+    * 
+    *  \return A keletkezett másolat
+    * 
     *   Nincs implementálva mert singleton
     **************************************************************************/    
     CStreamFilerFileHandler(const CStreamFilerFileHandler& orig); 
     
    /*!*************************************************************************
     *  \brief  Fájlkezelő singleton objektum értékadás operátora
+    * 
+    *  \param  CStreamFilerFileHandler& IN  Az eredeti példány
     * 
     *   Nincs implementálva mert singleton
     **************************************************************************/   

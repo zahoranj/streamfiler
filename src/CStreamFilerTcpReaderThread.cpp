@@ -5,8 +5,6 @@
  *  \brief   streamfiler tcp connection-kezelő szál osztálya
  *
  *  \author  Zahorán József
- * 
- *  \version 20210523 ZJ első változat
  *  
  *****************************************************************************/
 
@@ -17,17 +15,23 @@
 
 #include <unistd.h>
 #include <netinet/in.h>
+#include <thread>
 
 /*! ***************************************************************************
  *  \brief  Tcp connection-kezelő szál objektum konstruktora
  * 
- *  Nem kell külön feladatot végrehajtania
+ *  Létrehozza a hisztogramkészítőt
  *****************************************************************************/
 CStreamFilerTcpReaderThread::CStreamFilerTcpReaderThread() {
+    m_streamFilerHistogramMaker = new CStreamFilerHistogramMaker();
 }
 
 /*! ***************************************************************************
  *  \brief  Tcp connection-kezelő szál objektum másoló konstruktora
+ * 
+ *  \param  &orig IN A másolandó példány
+ * 
+ *  \return A keletkezett másolat
  * 
  *  Nem kell külön feladatot végrehajtania
  *****************************************************************************/
@@ -37,9 +41,13 @@ CStreamFilerTcpReaderThread::CStreamFilerTcpReaderThread(const CStreamFilerTcpRe
 /*! ***************************************************************************
  *  \brief  Tcp connection-kezelő szál objektum destruktora
  * 
- *  Nincs szükség külön takarításra
+ *  Törli a hisztogramkészítőt
  *****************************************************************************/
 CStreamFilerTcpReaderThread::~CStreamFilerTcpReaderThread() {
+    if (m_streamFilerHistogramMaker != NULL){
+        delete m_streamFilerHistogramMaker;
+    }
+        
 }
 
 /*! ***************************************************************************
@@ -68,12 +76,12 @@ void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lData
         ssize_t lBytesRead; //recv ssize_t-t ad vissza, ott használom
 
         ssize_t lMaxBufferSize = STREAM_FILER_FBUFFER_MAXSIZE_KB * 1024; //az lBytesRead-al hasonlítom, ami ssize_t
-        std::vector<char> vBuffer; //olvasó buffer
+        std::vector<uint8_t> vBuffer; //olvasó buffer - garantáltan 8 bites adatok
         vBuffer.clear();
         do {
             do {
                 //Olvasás a connection-ről
-                char acBuffer[lDataLimitByte] = {0};
+                uint8_t acBuffer[lDataLimitByte] = {0};
                 lBytesRead = recv(iConnectionDesc, acBuffer, lDataLimitByte, MSG_DONTWAIT); // MSG_DONTWAIT miatt a recv nem várakozik, "nonblocking"
 
                 if (lBytesRead == -1) { //adás vége jel
@@ -89,12 +97,12 @@ void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lData
                     }
 
                     //NOTE bizonyos méret felett fájlt is lehetne váltani (folyamatos streamhez - logrotate-szerűen)
-                    if ((lBytesRead + static_cast<ssize_t> (vBuffer.size())) > lMaxBufferSize) { //ssize_t-ket hasonlítok - figyelni kell a típusokra!
+                    if ((lBytesRead + static_cast<ssize_t> (vBuffer.size())) > lMaxBufferSize) { //ssize_t-ket hasonlítok - figyelni kell a típusokra!                    
                         if (!writeToFileFromBuffer(vBuffer, strFileName)) { //kiüírom a buffert a fájlba és megvárom a visszajelzést
                             close(iConnectionDesc);
                             isConnectionCloseRecommended = true; //ha hiba van, zárom a connectiont
                             break; //while (lBytesRead) >= 0 -ból
-                        }
+                        } 
                     }
                     for (long int f = 0; f < lBytesRead; f++) {
                         vBuffer.push_back(acBuffer[f]);
@@ -126,8 +134,8 @@ void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lData
 /*! ***************************************************************************
  *  \brief  Bufferelt adatok fájlba írását felügyelő funkció
  * 
- *  \param  vWriteBuffer  IN  Buffer - char-vektor bináris adatokkal 
- *  \param  strFileName   IN  Az írandó fájl neve (a célkönyvtár nélkül) 
+ *  \param  vBuffer         IN  Buffer - uint8_t-vektor bináris adatokkal 
+ *  \param  strFileName     IN  Az írandó fájl neve (a célkönyvtár nélkül) 
  * 
  *  \return true, ha az írás sikeres, egyébként false
  * 
@@ -135,7 +143,7 @@ void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lData
  *  Elküldi az írás-kérést a fájlkezelőnek, valamint írás után 
  *  kitakarítja a buffert.
  *****************************************************************************/
-bool CStreamFilerTcpReaderThread::writeToFileFromBuffer(std::vector<char> &vBuffer, std::string &strFileName) {
+bool CStreamFilerTcpReaderThread::writeToFileFromBuffer(std::vector<uint8_t> &vBuffer, std::string &strFileName) {
     //fálba írás FileHandler-rel
     if (!CStreamFilerFileHandler::getInstance().writeToFile(vBuffer, strFileName)) {
         printf("Bufferürítési  hiba (file: %s)\n", strFileName.c_str());
