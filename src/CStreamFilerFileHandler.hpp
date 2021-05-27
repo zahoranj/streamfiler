@@ -24,7 +24,7 @@ public:
 
     bool initialize(const std::string &strFolder);
     bool isFileWriterReady() const;
-    bool writeToFile(std::vector<uint8_t> &vWriteBuffer, std::string &strFileName);
+    bool writeToFile(const std::vector<uint8_t> &vau8Buffer, const std::string &strFileName);
 private:
    /*!*************************************************************************
     *  \brief   Az osztály egyetlen létező statikus példánya

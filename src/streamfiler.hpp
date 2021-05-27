@@ -23,7 +23,7 @@
  *****************************************************************************/
 enum E_STREAM_FILER_EXITCODES {
     STREAM_FILER_EXIT_NORMAL    =  0,   //!< Futás hiba nélkül befejeződött
-    //A bejövő signalokból is kilépési kós lehet, 1-64-ig nekik fenntartva
+    //A bejövő signalokból is kilépési kód lehet, 1-64-ig nekik fenntartva
     STREAM_FILER_EXIT_HELP      =  100, //!< Futás help kéréssel fejeződött be   
     STREAM_FILER_EXIT_SOCKET    = -1,   //!< Socket hiba
     STREAM_FILER_EXIT_FILE      = -2,   //!< File írás hiba

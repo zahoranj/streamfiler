@@ -102,7 +102,7 @@ bool CStreamFilerFileHandler::isFileWriterReady() const {
 /*! ***************************************************************************
  *  \brief  Buffer tartalmának írása fájlba
  * 
- *  \param  vWriteBuffer  IN  Buffer - uint8_t-vektor bináris adatokkal 
+ *  \param  vau8Buffer  IN  Buffer - uint8_t-vektor bináris adatokkal 
  *  \param  strFileName   IN  Az írandó fájl neve (a célkönyvtár nélkül)
  *
  *  \return true, ha az írás sikeres, egyébként false
@@ -110,7 +110,7 @@ bool CStreamFilerFileHandler::isFileWriterReady() const {
  *  Kiírja a vWriteBuffer tartalmát a célkönyvtárban lévő 
  *  strFileName-ben megadott nevű fájlba
  *****************************************************************************/
-bool CStreamFilerFileHandler::writeToFile(std::vector<uint8_t> &vWriteBuffer, std::string &strFileName) {
+bool CStreamFilerFileHandler::writeToFile(const std::vector<uint8_t> &vau8Buffer, const std::string &strFileName) {
     std::ofstream oFileStream;
     std::string strFullFileName;
     strFullFileName.assign(m_strDestFolder);
@@ -122,8 +122,9 @@ bool CStreamFilerFileHandler::writeToFile(std::vector<uint8_t> &vWriteBuffer, st
         throw STREAM_FILER_EXIT_FILE;
     }
 
-    vWriteBuffer.shrink_to_fit();
-    oFileStream.write(reinterpret_cast<char *>(vWriteBuffer.data()), vWriteBuffer.size());
+    std::vector<uint8_t> vau8WriteBuffer(vau8Buffer); //saját másolatból dolgozik
+    vau8WriteBuffer.shrink_to_fit();
+    oFileStream.write(reinterpret_cast<char *>(vau8WriteBuffer.data()), vau8WriteBuffer.size());
     oFileStream.flush();
 
     oFileStream.close();

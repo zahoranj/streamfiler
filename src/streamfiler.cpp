@@ -8,11 +8,13 @@
  * 
  *  \author  Zahorán József
  * 
- *  \version    20210526 ZJ első változat
- *  \version    20210523 ZJ char helyett biztosan 8 bitet olvas be;
+ *  \version    20210523 ZJ első változat
+ *  \version    20210526 ZJ char helyett biztosan 8 bitet olvas be;
  *                          signalkezelésnél nem írta ki, hogy kilépett;
  *                          Hisztogramgyártás előkészítése, tervezése;
  *                          dokumentáció javítása
+ *  \version    20210527 ZJ a kód hibatűróbbé tétele;
+ *                          Újabb lépések a hisztogramgyártás felé
  *  
  *****************************************************************************/
 

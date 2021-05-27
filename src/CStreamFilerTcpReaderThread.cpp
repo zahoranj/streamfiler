@@ -22,8 +22,7 @@
  * 
  *  Létrehozza a hisztogramkészítőt
  *****************************************************************************/
-CStreamFilerTcpReaderThread::CStreamFilerTcpReaderThread() {
-    m_streamFilerHistogramMaker = new CStreamFilerHistogramMaker();
+CStreamFilerTcpReaderThread::CStreamFilerTcpReaderThread() {   
 }
 
 /*! ***************************************************************************
@@ -43,13 +42,8 @@ CStreamFilerTcpReaderThread::CStreamFilerTcpReaderThread(const CStreamFilerTcpRe
  * 
  *  Törli a hisztogramkészítőt
  *****************************************************************************/
-CStreamFilerTcpReaderThread::~CStreamFilerTcpReaderThread() {
-    if (m_streamFilerHistogramMaker != NULL){
-        delete m_streamFilerHistogramMaker;
-    }
-        
+CStreamFilerTcpReaderThread::~CStreamFilerTcpReaderThread() {            
 }
-
 /*! ***************************************************************************
  *  \brief  Tcp connection-kezelő szál objektum túlterhelt funkcióhívó operátora
  * 
@@ -65,6 +59,8 @@ CStreamFilerTcpReaderThread::~CStreamFilerTcpReaderThread() {
  *   a connection-t.
  *****************************************************************************/
 void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lDataLimitByte, int iIdleTimeoutSec) {
+    m_pStreamFilerHistogramMaker = new CStreamFilerHistogramMaker();
+
     if (CStreamFilerFileHandler::getInstance().isFileWriterReady()) { //Ha a fileíró rendelkezésre áll
         bool isConnectionIdle = false;
         bool isConnectionCloseRecommended = false;
@@ -76,13 +72,13 @@ void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lData
         ssize_t lBytesRead; //recv ssize_t-t ad vissza, ott használom
 
         ssize_t lMaxBufferSize = STREAM_FILER_FBUFFER_MAXSIZE_KB * 1024; //az lBytesRead-al hasonlítom, ami ssize_t
-        std::vector<uint8_t> vBuffer; //olvasó buffer - garantáltan 8 bites adatok
-        vBuffer.clear();
+        std::vector<uint8_t> vau8Buffer; //olvasó buffer - garantáltan 8 bites adatok
+        vau8Buffer.clear();
         do {
             do {
                 //Olvasás a connection-ről
-                uint8_t acBuffer[lDataLimitByte] = {0};
-                lBytesRead = recv(iConnectionDesc, acBuffer, lDataLimitByte, MSG_DONTWAIT); // MSG_DONTWAIT miatt a recv nem várakozik, "nonblocking"
+                uint8_t au8Buffer[lDataLimitByte] = {0};
+                lBytesRead = recv(iConnectionDesc, au8Buffer, lDataLimitByte, MSG_DONTWAIT); // MSG_DONTWAIT miatt a recv nem várakozik, "nonblocking"
 
                 if (lBytesRead == -1) { //adás vége jel
                     if (!isConnectionIdle) {//folyamatosan jöhet
@@ -97,15 +93,15 @@ void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lData
                     }
 
                     //NOTE bizonyos méret felett fájlt is lehetne váltani (folyamatos streamhez - logrotate-szerűen)
-                    if ((lBytesRead + static_cast<ssize_t> (vBuffer.size())) > lMaxBufferSize) { //ssize_t-ket hasonlítok - figyelni kell a típusokra!                    
-                        if (!writeToFileFromBuffer(vBuffer, strFileName)) { //kiüírom a buffert a fájlba és megvárom a visszajelzést
+                    if ((lBytesRead + static_cast<ssize_t> (vau8Buffer.size())) > lMaxBufferSize) { //ssize_t-ket hasonlítok - figyelni kell a típusokra!                    
+                        if (!writeToFileFromBuffer(vau8Buffer, strFileName)) { //kiüírom a buffert a fájlba és megvárom a visszajelzést
                             close(iConnectionDesc);
                             isConnectionCloseRecommended = true; //ha hiba van, zárom a connectiont
                             break; //while (lBytesRead) >= 0 -ból
-                        } 
+                        }
                     }
                     for (long int f = 0; f < lBytesRead; f++) {
-                        vBuffer.push_back(acBuffer[f]);
+                        vau8Buffer.push_back(au8Buffer[f]);
                     }
                 }
                 //várok egy másodpercet a következő olvasás előtt
@@ -113,8 +109,8 @@ void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lData
 
             } while (lBytesRead >= 0);
 
-            if (vBuffer.size() > 0) {
-                if (!writeToFileFromBuffer(vBuffer, strFileName)) { //kiüírom a buffert a fájlba és megvárom a visszajelzést
+            if (vau8Buffer.size() > 0) {
+                if (!writeToFileFromBuffer(vau8Buffer, strFileName)) { //kiüírom a buffert a fájlba és megvárom a visszajelzést
                     close(iConnectionDesc);
                     isConnectionCloseRecommended = true; //ha hiba van, zárom a connectiont                    
                 }
@@ -126,15 +122,23 @@ void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lData
                 }
             }
         } while (!isConnectionCloseRecommended);
+        
+        if (m_pStreamFilerHistogramMaker == NULL || !(m_pStreamFilerHistogramMaker->writeHistogramFile())){
+            printf("Hisztogram fájlba írása nem sikerült (Fájl: %s).\n", strFileName.c_str());        
+        }        
     }
 
-    close(iConnectionDesc); //Itt a valódi zárás        
+    close(iConnectionDesc); //Itt a valódi zárás      
+
+    if (m_pStreamFilerHistogramMaker != NULL) { //az argumentumok átadása miatt a destruktor a vége előtt is lefuthat, ezért tettem ide
+        delete m_pStreamFilerHistogramMaker;    //TODO van szebb megoldás?
+    }
 }
 
 /*! ***************************************************************************
  *  \brief  Bufferelt adatok fájlba írását felügyelő funkció
  * 
- *  \param  vBuffer         IN  Buffer - uint8_t-vektor bináris adatokkal 
+ *  \param  vau8Buffer      IN  Buffer - uint8_t-vektor bináris adatokkal 
  *  \param  strFileName     IN  Az írandó fájl neve (a célkönyvtár nélkül) 
  * 
  *  \return true, ha az írás sikeres, egyébként false
@@ -143,14 +147,19 @@ void CStreamFilerTcpReaderThread::operator()(int iConnectionDesc, long int lData
  *  Elküldi az írás-kérést a fájlkezelőnek, valamint írás után 
  *  kitakarítja a buffert.
  *****************************************************************************/
-bool CStreamFilerTcpReaderThread::writeToFileFromBuffer(std::vector<uint8_t> &vBuffer, std::string &strFileName) {
+bool CStreamFilerTcpReaderThread::writeToFileFromBuffer(std::vector<uint8_t> &vau8Buffer, std::string &strFileName) {
+    //elküldés hisztogramkészítéshez
+    if (m_pStreamFilerHistogramMaker == NULL || !(m_pStreamFilerHistogramMaker->sendDataForHistogram(vau8Buffer, strFileName))){
+        printf("Adatok elküldése a hisztogramkészítőnek nem sikerült (Fájl: %s).\n", strFileName.c_str());
+    }
+    
     //fálba írás FileHandler-rel
-    if (!CStreamFilerFileHandler::getInstance().writeToFile(vBuffer, strFileName)) {
-        printf("Bufferürítési  hiba (file: %s)\n", strFileName.c_str());
+    if (!CStreamFilerFileHandler::getInstance().writeToFile(vau8Buffer, strFileName)) {
+        printf("Buffer fájlírási  hiba (file: %s)\n", strFileName.c_str());
         return false;
     }
-    vBuffer.clear(); //kiürítem a buffert, ha a fálba írás végzett
-    vBuffer.shrink_to_fit();
+    vau8Buffer.clear(); //kiürítem a buffert, ha a fálba írás végzett
+    vau8Buffer.shrink_to_fit();
 
     return true;
 }

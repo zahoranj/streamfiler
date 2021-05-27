@@ -24,11 +24,12 @@ public:
     CStreamFilerTcpReaderThread();
     CStreamFilerTcpReaderThread(const CStreamFilerTcpReaderThread& orig);
     virtual ~CStreamFilerTcpReaderThread();
-    void operator()(int iConnectionDesc, long int lDataLimitByte, int iIdleTimeoutSec);
-    bool writeToFileFromBuffer(std::vector<uint8_t>& vBuffer, std::string& strFileName);
+    void operator()(int iConnectionDesc, long int lDataLimitByte, int iIdleTimeoutSec);    
 
 private:
-    CStreamFilerHistogramMaker *m_streamFilerHistogramMaker;
+    CStreamFilerHistogramMaker *m_pStreamFilerHistogramMaker;
+    
+    bool writeToFileFromBuffer(std::vector<uint8_t>& vau8Buffer, std::string& strFileName);
 };
 
 #endif // CSTREAMFILERTCPREADERTHREAD_HPP 

@@ -139,8 +139,7 @@ void CStreamFilerTcpReader::startSocketListener() {
             mapConnections.erase(iterMap);
         }
 
-        //A threadet elindítom és felveszem a map-be, a kulcs a descriptor
-        mapConnections.insert(std::make_pair(iConnectionDesc, 
-                std::thread(CStreamFilerTcpReaderThread(), iConnectionDesc, lDataLimitByte, m_iIdleTimeoutSec)));
+        //A threadet elindítom és felveszem a map-be, a kulcs a descriptor      
+        mapConnections.insert(std::make_pair(iConnectionDesc, std::thread(CStreamFilerTcpReaderThread(), iConnectionDesc, lDataLimitByte, m_iIdleTimeoutSec)));
     }
 }
